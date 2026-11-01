@@ -1,90 +1,123 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // BetBoom Signature Brand Colors
-  static const Color primary = Color(0xFFFFE600); // BetBoom Electric Yellow
-  static const Color primaryDark = Color(0xFFE5CE00);
-  static const Color secondary = Color(0xFFEA1B23); // BetBoom Signature Red
-  static const Color accentRed = Color(0xFFEA1B23);
-  static const Color accentYellow = Color(0xFFFFE600);
-  static const Color accentGreen = Color(0xFF10B981); // Success / Win
-  static const Color accentPurple = Color(0xFFA855F7);
-  static const Color accentGold = Color(0xFFFFD12E);
-  static const Color accentOrange = Color(0xFFFF7A00);
+  // ПАЛИТРА ПО ТЗ (BB / Betboom):
+  // • #F5F1E9 — основной светлый фон.
+  // • #F1F3F2 — фон информационных блоков.
+  // • #FFFFFF — светлые карточки.
+  // • #F5F500 — основной ярко-жёлтый акцент: кнопки, активные вкладки, шкалы прогресса.
+  // • #191919 — фон тёмных карточек и нижней навигации.
+  // • #292929 — дополнительные тёмные поверхности.
+  // • #202320 — основной текст на светлом фоне.
+  // • #FFFFFF — текст на тёмных карточках.
+  // • #686D69 — второстепенные подписи на светлом фоне.
+  // • #BFC3BF — второстепенные подписи на тёмном фоне.
+  // • #DDE1DD — разделители и контуры.
+  // На жёлтых кнопках использовать текст #191919.
+
+  static const Color background = Color(0xFFF5F1E9);
+  static const Color surfaceBlock = Color(0xFFF1F3F2);
+  static const Color surfaceLightCard = Color(0xFFFFFFFF);
+  static const Color primary = Color(0xFFF5F500); // Ярко-жёлтый
+  static const Color darkCard = Color(0xFF191919); // Тёмные карточки и нижняя навигация
+  static const Color darkSurface = Color(0xFF292929);
+  static const Color textDark = Color(0xFF202320);
+  static const Color textLight = Color(0xFFFFFFFF);
+  static const Color textSecondary = Color(0xFF686D69);
+  static const Color textMutedDark = Color(0xFFBFC3BF);
+  static const Color border = Color(0xFFDDE1DD);
+  static const Color onPrimary = Color(0xFF191919);
+
+  // Семантические алиасы
+  static const Color surface = surfaceLightCard;
+  static const Color surfaceCard = surfaceLightCard;
+  static const Color surfaceBorder = border;
+  static const Color surfaceCardHighlight = surfaceBlock;
+  static const Color textPrimary = textDark;
+  static const Color secondary = darkCard;
+  static const Color accentYellow = primary;
+  static const Color accentGold = primary;
+  static const Color accentGreen = Color(0xFF10B981);
   static const Color accentRose = Color(0xFFEA1B23);
+  static const Color accentRed = Color(0xFFEA1B23);
+  static const Color accentPurple = Color(0xFFA855F7);
+  static const Color accentOrange = Color(0xFFFF7A00);
+  static const Color textMuted = textSecondary;
 
-  // BetBoom Deep Carbon Graphite Surfaces
-  static const Color background = Color(0xFF101116); // Deep Carbon Graphite
-  static const Color surface = Color(0xFF171922); // Dark Surface
-  static const Color surfaceCard = Color(0xFF1F222D); // Card Background
-  static const Color surfaceBorder = Color(0xFF2D313F); // Border
-  static const Color surfaceCardHighlight = Color(0xFF282C3A);
+  static const double cardRadius = 20.0;
+  static const double buttonRadius = 12.0;
+  static const double screenPadding = 16.0;
+  static const double buttonHeight = 48.0;
 
-  // Text Colors
-  static const Color textPrimary = Color(0xFFFFFFFF);
-  static const Color textSecondary = Color(0xFF8F95A5);
-  static const Color textMuted = Color(0xFF5E6473);
+  static List<BoxShadow> get cardShadow => [
+        BoxShadow(
+          color: Colors.black.withAlpha(15),
+          blurRadius: 10,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
-  // Box Shadows
+  static List<BoxShadow> get darkCardShadow => [
+        BoxShadow(
+          color: Colors.black.withAlpha(35),
+          blurRadius: 12,
+          offset: const Offset(0, 4),
+        ),
+      ];
+
   static List<BoxShadow> get neonGlow => [
         BoxShadow(
-          color: primary.withAlpha(45),
+          color: primary.withAlpha(80),
           blurRadius: 16,
           spreadRadius: 1,
         ),
       ];
 
-  static List<BoxShadow> get redGlow => [
-        BoxShadow(
-          color: secondary.withAlpha(50),
-          blurRadius: 16,
-          spreadRadius: 1,
-        ),
-      ];
+  static List<BoxShadow> get redGlow => neonGlow;
 
-  static ThemeData get darkTheme {
+  static ThemeData get lightTheme {
     return ThemeData(
-      brightness: Brightness.dark,
+      brightness: Brightness.light,
       scaffoldBackgroundColor: background,
       primaryColor: primary,
-      colorScheme: const ColorScheme.dark(
+      colorScheme: const ColorScheme.light(
         primary: primary,
-        secondary: secondary,
-        surface: surface,
+        secondary: darkCard,
+        surface: surfaceLightCard,
         error: accentRose,
+        onPrimary: onPrimary,
+        onSurface: textDark,
       ),
-      textTheme: GoogleFonts.interTextTheme(
-        ThemeData.dark().textTheme,
-      ).apply(
-        bodyColor: textPrimary,
-        displayColor: textPrimary,
-      ),
-      appBarTheme: AppBarTheme(
-        backgroundColor: background,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: GoogleFonts.outfit(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: textPrimary,
-          letterSpacing: 0.5,
-        ),
-        iconTheme: const IconThemeData(color: textPrimary),
+      fontFamily: null, // Системный шрифт
+      textTheme: const TextTheme(
+        headlineLarge: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: textDark),
+        headlineMedium: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textDark),
+        titleLarge: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: textDark),
+        titleMedium: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textDark),
+        bodyLarge: TextStyle(fontSize: 16, fontWeight: FontWeight.normal, color: textDark),
+        bodyMedium: TextStyle(fontSize: 14, fontWeight: FontWeight.normal, color: textSecondary),
+        bodySmall: TextStyle(fontSize: 12, fontWeight: FontWeight.normal, color: textSecondary),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
-          foregroundColor: const Color(0xFF101116),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          textStyle: GoogleFonts.outfit(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-          ),
+          foregroundColor: onPrimary,
+          minimumSize: const Size(0, buttonHeight),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius)),
+          elevation: 0,
         ),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: background,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: textDark),
+        iconTheme: IconThemeData(color: textDark),
       ),
     );
   }
+
+  // Для совместимости
+  static ThemeData get darkTheme => lightTheme;
 }

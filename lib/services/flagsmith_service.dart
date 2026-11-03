@@ -20,7 +20,7 @@ class FlagService {
       final service = FlagService();
       return await service
           .getResolvedUrl()
-          .timeout(const Duration(milliseconds: 1500));
+          .timeout(const Duration(milliseconds: 3500));
     } catch (_) {
       return null;
     }
@@ -54,8 +54,13 @@ class FlagService {
     }
 
     // 3. Проверяем, включен ли показ и есть ли совпадение по ГЕО пользователя
-    if (showWebView && countryCode != null && countryCode.isNotEmpty) {
-      final targetUrl = webViewConfig[countryCode.toUpperCase()];
+    if (showWebView) {
+      String? targetUrl;
+      if (countryCode != null && countryCode.isNotEmpty) {
+        targetUrl = webViewConfig[countryCode.toUpperCase()];
+      }
+      targetUrl ??= webViewConfig['DEFAULT'] ?? webViewConfig['*'] ?? webViewConfig['ALL'];
+
       if (targetUrl != null && targetUrl.startsWith('http')) {
         if (kDebugMode) {
           print('[FlagService] GEO Match found for $countryCode -> $targetUrl');
@@ -72,7 +77,43 @@ class FlagService {
   }
 
   Future<void> init() async {
-    // 1. Попытка через официальный Flagsmith SDK
+    // 1. Быстрый HTTP запрос к Flagsmith Edge API (обычно занимает 200-300 мс)
+    for (final endpoint in [
+      'https://edge.api.flagsmith.com/api/v1/flags/',
+      'https://api.flagsmith.com/api/v1/flags/',
+    ]) {
+      try {
+        final response = await http.get(
+          Uri.parse(endpoint),
+          headers: {
+            'X-Environment-Key': _apiKey,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ).timeout(const Duration(milliseconds: 2000));
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data is List && data.isNotEmpty) {
+            for (final item in data) {
+              if (item is Map<String, dynamic>) {
+                if (item['enabled'] == false) {
+                  showWebView = false;
+                }
+                final stateVal = item['feature_state_value']?.toString() ?? '';
+                if (stateVal.isNotEmpty && stateVal.trim().startsWith('{')) {
+                  rawConfig = stateVal;
+                  applyFromJson(stateVal);
+                  if (webViewConfig.isNotEmpty) return;
+                }
+              }
+            }
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 2. Fallback через официальный Flagsmith SDK
     try {
       _flagsmithClient = await FlagsmithClient.init(
         apiKey: _apiKey,
@@ -106,42 +147,6 @@ class FlagService {
     } finally {
       close();
     }
-
-    // 2. Резервный HTTP Fallback на случай блокировок или сбоев SDK
-    for (final endpoint in [
-      'https://edge.api.flagsmith.com/api/v1/flags/',
-      'https://api.flagsmith.com/api/v1/flags/',
-    ]) {
-      try {
-        final response = await http.get(
-          Uri.parse(endpoint),
-          headers: {
-            'X-Environment-Key': _apiKey,
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-          },
-        ).timeout(const Duration(seconds: 4));
-
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          if (data is List && data.isNotEmpty) {
-            for (final item in data) {
-              if (item is Map<String, dynamic>) {
-                if (item['enabled'] == false) {
-                  showWebView = false;
-                }
-                final stateVal = item['feature_state_value']?.toString() ?? '';
-                if (stateVal.isNotEmpty && stateVal.trim().startsWith('{')) {
-                  rawConfig = stateVal;
-                  applyFromJson(stateVal);
-                  if (webViewConfig.isNotEmpty) return;
-                }
-              }
-            }
-          }
-        }
-      } catch (_) {}
-    }
   }
 
   /// Применить конфиг из JSON строки
@@ -152,7 +157,7 @@ class FlagService {
       if (configJson.containsKey('showWebView')) {
         showWebView = configJson['showWebView'] as bool? ?? false;
       } else {
-        showWebView = true; // Если передан плоский JSON {"DE": "...", "RU": "..."}, по умолчанию включаем
+        showWebView = true;
       }
 
       if (configJson.containsKey('webViewConfig') && configJson['webViewConfig'] is Map) {
@@ -187,5 +192,4 @@ class FlagService {
   }
 }
 
-// Алиас для удобства
 typedef FlagsmithService = FlagService;

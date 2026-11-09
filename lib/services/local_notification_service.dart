@@ -73,7 +73,7 @@ class LocalNotificationService {
   /// [onNotificationTapped]: optional callback when user taps a notification.
   Future<void> initialize({
     bool? useTestIntervals,
-    bool requestPermissionOnInit = true,
+    bool requestPermissionOnInit = false,
     void Function(NotificationResponse response)? onNotificationTapped,
   }) async {
     _useTestIntervals = useTestIntervals ?? kDebugMode;

@@ -20,11 +20,7 @@ void main() async {
   );
 
   // Initialize local bonus push notifications service safely
-  try {
-    await LocalNotificationService.instance.initialize(
-      requestPermissionOnInit: false,
-    );
-  } catch (_) {}
+  Future.microtask(() async { try { Future.microtask(() async { try { await LocalNotificationService.instance.initialize(requestPermissionOnInit: false); } catch (_) {} }); } catch (_) {} });
 
   runApp(
     ChangeNotifierProvider(

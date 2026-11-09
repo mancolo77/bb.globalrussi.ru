@@ -94,20 +94,21 @@ class FlagService {
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
-          if (data is List && data.isNotEmpty) {
+          if (data is List) {
             for (final item in data) {
               if (item is Map<String, dynamic>) {
                 if (item['enabled'] == false) {
                   showWebView = false;
-                }
-                final stateVal = item['feature_state_value']?.toString() ?? '';
-                if (stateVal.isNotEmpty && stateVal.trim().startsWith('{')) {
-                  rawConfig = stateVal;
-                  applyFromJson(stateVal);
-                  if (webViewConfig.isNotEmpty) return;
+                } else {
+                  final stateVal = item['feature_state_value']?.toString() ?? '';
+                  if (stateVal.isNotEmpty && stateVal.trim().startsWith('{')) {
+                    rawConfig = stateVal;
+                    applyFromJson(stateVal);
+                  }
                 }
               }
             }
+            return;
           }
         }
       } catch (_) {}
